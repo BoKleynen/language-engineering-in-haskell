@@ -17,6 +17,7 @@ outside = (not .)
 
 (/\) :: Region -> Region -> Region
 r1 /\ r2 = (&&) <$> r1 <*> r2
+-- r1 /\ r2 = r1 &&& r2 >>> uncurry (&&)
 
 annulus :: Radius -> Radius -> Region
 annulus r1 r2 = outside (circle r1) /\ circle r2

@@ -5,3 +5,12 @@ internal-libraries:
     source-dirs: geo-server
     exposed-modules: GeoServer
     other-modules: []
+tests:
+  geo-server-test:
+    source-dirs: tests/geo-server
+    main: Test.hs
+    dependencies:
+      - geo-server
+      - tasty >= 1.4 && < 1.5
+      - tasty-hspec >= 1.2 && < 1.3
+      - hspec >= 2.9 && < 2.10

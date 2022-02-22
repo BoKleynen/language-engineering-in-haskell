@@ -1,4 +1,9 @@
 name: language-engineering
+version: 0.1.0
+description: |
+  This package contains some code snippets I wrote for the language engineering topic of
+  the course Capita Selecta Computer Science: Artificial Intelligence [H05N0A] at KU Leuven
+  (https://onderwijsaanbod.kuleuven.be/2021/syllabi/e/H05N0AE.htm#activetab=doelstellingen_idp1606608).
 dependencies: base >=4.14 && <4.15
 internal-libraries:
   geo-server:

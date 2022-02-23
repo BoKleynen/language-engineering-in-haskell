@@ -13,7 +13,8 @@ build-type:     Simple
 
 library geo-server
   exposed-modules:
-      GeoServer
+      GeoServerShallow
+      GeoServerDeep
   hs-source-dirs:
       geo-server
   build-depends:

@@ -25,9 +25,8 @@ test-suite geo-server-test
   type: exitcode-stdio-1.0
   main-is: Test.hs
   other-modules:
-      Paths_language_engineering
-  autogen-modules:
-      Paths_language_engineering
+      GeoServerShallowTest
+      GeoServerDeepTest
   hs-source-dirs:
       tests/geo-server
   build-depends:

@@ -16,6 +16,9 @@ tests:
   geo-server-test:
     source-dirs: tests/geo-server
     main: Test.hs
+    other-modules:
+      - GeoServerShallowTest
+      - GeoServerDeepTest
     dependencies:
       - geo-server
       - tasty >= 1.4 && < 1.5

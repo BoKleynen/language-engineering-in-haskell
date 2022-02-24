@@ -21,6 +21,18 @@ library geo-server
       base ==4.14.*
   default-language: Haskell2010
 
+library monads
+  exposed-modules:
+      Basic
+      Exceptions
+      Output
+      State
+  hs-source-dirs:
+      monads
+  build-depends:
+      base ==4.14.*
+  default-language: Haskell2010
+
 test-suite geo-server-test
   type: exitcode-stdio-1.0
   main-is: Test.hs

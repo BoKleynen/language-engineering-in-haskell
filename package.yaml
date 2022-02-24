@@ -12,6 +12,14 @@ internal-libraries:
       - GeoServerShallow
       - GeoServerDeep
     other-modules: []
+  monads:
+    source-dirs: monads
+    exposed-modules:
+      - Basic
+      - Exceptions
+      - Output
+      - State
+    other-modules: []
 tests:
   geo-server-test:
     source-dirs: tests/geo-server

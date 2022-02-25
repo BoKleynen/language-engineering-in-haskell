@@ -8,7 +8,7 @@ type Radius = Double
 
 type Side = Double
 
--- -- Deep embedding
+-- Deep embedding
 -- - less efficient
 -- - easy to add new interpretations (e.g.: SVG representation)
 -- - more work to add new kinds of regions => would have to update all pattern matches

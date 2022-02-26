@@ -17,6 +17,6 @@ eval (Div t u) = case eval t of
   Return a -> case eval u of
     Raise e -> Raise e
     Return b ->
-        if b == 0
-            then Raise "divide by zero"
-            else Return (a `div` b)
+      if b == 0
+        then Raise "divide by zero"
+        else Return (a `div` b)

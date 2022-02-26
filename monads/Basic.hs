@@ -1,6 +1,8 @@
 module Basic where
 
-data Term = Con Int | Div Term Term
+data Term
+  = Con Int
+  | Div Term Term
 
 eval :: Term -> Int
 eval (Con a)   = a

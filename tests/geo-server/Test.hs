@@ -9,11 +9,11 @@ import GeoServerDeepTest
 
 main :: IO ()
 main = do
-    specs <- concat <$> mapM testSpecs
-        [ geoServerShallowSpecs
-        , geoServerDeepSpecs
-        ]
-    defaultMain (testGroup "All tests" [
-        testGroup "Specs" specs
-     ])
+  specs <- concat <$> mapM testSpecs
+    [ geoServerShallowSpecs
+    , geoServerDeepSpecs
+    ]
+  defaultMain (testGroup "All tests" [
+      testGroup "Specs" specs
+    ])
 

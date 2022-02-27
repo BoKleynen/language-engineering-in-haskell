@@ -8,8 +8,8 @@ type State = Int
 type M a = State -> (a, State)
 
 data Term
-    = Con Int
-    | Div Term Term
+  = Con Int
+  | Div Term Term
 
 eval :: Term -> M Int
 eval (Con a) x = (a, x)

@@ -10,7 +10,7 @@ type M a = (Output, a)
 data Term
   = Con Int
   | Div Term Term
-    deriving Show
+  deriving Show
 
 eval :: Term -> M Int
 eval (Con a)   = (line (Con a) a, a)

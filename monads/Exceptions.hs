@@ -20,3 +20,20 @@ eval (Div t u) = case eval t of
       if b == 0
         then Raise "divide by zero"
         else Return (a `div` b)
+
+instance Functor M where
+  fmap _ (Raise e)  = Raise e
+  fmap g (Return x) = Return (g x)
+
+instance Applicative M where
+  pure = Return
+
+  (Return g) <*> (Return x) = Return (g x)
+  (Raise e) <*> _ = Raise e
+  _ <*> (Raise e) = Raise e
+
+instance Monad M where
+  return = pure
+
+  (Return x) >>= g = g x
+  (Raise e) >>= _ = Raise e

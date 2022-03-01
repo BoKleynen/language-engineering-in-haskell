@@ -14,10 +14,10 @@ data Term
 
 eval :: Term -> M Int
 eval (Con a)   = (line (Con a) a, a)
-eval (Div t u) =
-  let (x,a) = eval t
-      (y,b) = eval u
-  in  (x ++ y ++ line (Div t u) (a `div` b), a `div` b)
+eval (Div t u) = (x ++ y ++ line (Div t u) (a `div` b), a `div` b)
+  where
+    (x,a) = eval t
+    (y,b) = eval u
 
 line :: Term -> Int -> Output
 line t a = "eval (" ++ show t ++ ") <=" ++ show a ++ "\n"
@@ -41,9 +41,9 @@ instance Monoid o => Monad (OutputM o) where
   return = pure
 
   (>>=) :: OutputM o a -> (a -> OutputM o b) -> OutputM o b
-  (MkOutput (o, x)) >>= g =
-    let MkOutput (o', b) = g x
-    in MkOutput (o <> o', b)
+  (MkOutput (o, x)) >>= g = MkOutput (o <> o', b)
+    where
+      MkOutput (o', b) = g x
 
 out :: Output -> OutputM Output ()
 out x = MkOutput (x, ())

@@ -11,10 +11,27 @@ description:    This package contains some code snippets I wrote for the languag
                 (https://onderwijsaanbod.kuleuven.be/2021/syllabi/e/H05N0AE.htm#activetab=doelstellingen_idp1606608).
 build-type:     Simple
 
+library arith
+  exposed-modules:
+      Arith
+  other-modules:
+      Paths_language_engineering
+  autogen-modules:
+      Paths_language_engineering
+  hs-source-dirs:
+      arith
+  build-depends:
+      base ==4.14.*
+  default-language: Haskell2010
+
 library geo-server
   exposed-modules:
       GeoServerShallow
       GeoServerDeep
+  other-modules:
+      Paths_language_engineering
+  autogen-modules:
+      Paths_language_engineering
   hs-source-dirs:
       geo-server
   build-depends:
@@ -27,11 +44,33 @@ library monads
       Exceptions
       Output
       State
+  other-modules:
+      Paths_language_engineering
+  autogen-modules:
+      Paths_language_engineering
   hs-source-dirs:
       monads
   build-depends:
       base ==4.14.*
     , mtl ==2.2.*
+  default-language: Haskell2010
+
+test-suite arith-test
+  type: exitcode-stdio-1.0
+  main-is: Test.hs
+  other-modules:
+      Paths_language_engineering
+  autogen-modules:
+      Paths_language_engineering
+  hs-source-dirs:
+      tests/arith
+  build-depends:
+      QuickCheck ==2.14.*
+    , arith
+    , base ==4.14.*
+    , hedgehog >=0.5 && <1.1
+    , tasty >=0.11 && <1.5
+    , tasty-hedgehog >=0.1 && <1.1
   default-language: Haskell2010
 
 test-suite geo-server-test

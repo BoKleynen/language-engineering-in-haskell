@@ -11,7 +11,6 @@ internal-libraries:
     exposed-modules:
       - GeoServerShallow
       - GeoServerDeep
-    other-modules: []
   monads:
     source-dirs: monads
     exposed-modules:
@@ -19,9 +18,12 @@ internal-libraries:
       - Exceptions
       - Output
       - State
-    other-modules: []
     dependencies:
       - mtl >= 2.2 && < 2.3
+  arith:
+    source-dirs: arith
+    exposed-modules:
+      - Arith
 tests:
   geo-server-test:
     source-dirs: tests/geo-server
@@ -34,3 +36,12 @@ tests:
       - tasty >= 1.4 && < 1.5
       - tasty-hspec >= 1.2 && < 1.3
       - hspec >= 2.9 && < 2.10
+  arith-test:
+    source-dirs: tests/arith
+    main: Test.hs
+    dependencies:
+      - arith
+      - QuickCheck >= 2.14 && < 2.15
+      - tasty >= 0.11 && < 1.5
+      - tasty-hedgehog >= 0.1 && < 1.1
+      - hedgehog >= 0.5 && < 1.1

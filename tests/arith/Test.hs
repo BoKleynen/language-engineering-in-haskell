@@ -6,7 +6,6 @@ import Test.Tasty
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 import qualified Test.Tasty.Hedgehog as H
-import qualified Test.QuickCheck as Quick
 import qualified Test.Tasty.QuickCheck as QC
 
 import Arith
@@ -47,15 +46,15 @@ prop_eval = property $ do
   [eval exp] === run (compile exp) []
 
 
-instance Quick.Arbitrary Exp where
+instance QC.Arbitrary Exp where
   arbitrary =
-    Quick.frequency [ (3, Const <$> Quick.arbitrary)
-                    , (1, Add <$> Quick.arbitrary <*> Quick.arbitrary)
-                    , (1, Mul <$> Quick.arbitrary <*> Quick.arbitrary)
-                    , (1, Sub <$> Quick.arbitrary <*> Quick.arbitrary)
-                    ]
+    QC.frequency [ (3, Const <$> QC.arbitrary)
+                 , (1, Add <$> QC.arbitrary <*> QC.arbitrary)
+                 , (1, Mul <$> QC.arbitrary <*> QC.arbitrary)
+                 , (1, Sub <$> QC.arbitrary <*> QC.arbitrary)
+                 ]
 
-  shrink (Const n)   = [ Const n' | n' <- Quick.shrink n ]
-  shrink (Add e1 e2) = [ Add e1' e2 | e1' <- Quick.shrink e1] ++  [ Add e1 e2' | e2' <- Quick.shrink e2]
-  shrink (Mul e1 e2) = [ Mul e1' e2 | e1' <- Quick.shrink e1] ++  [ Mul e1 e2' | e2' <- Quick.shrink e2]
-  shrink (Sub e1 e2) = [ Sub e1' e2 | e1' <- Quick.shrink e1] ++  [ Sub e1 e2' | e2' <- Quick.shrink e2]
+  shrink (Const n)   = [ Const n' | n' <- QC.shrink n ]
+  shrink (Add e1 e2) = [ Add e1' e2 | e1' <- QC.shrink e1] ++  [ Add e1 e2' | e2' <- QC.shrink e2]
+  shrink (Mul e1 e2) = [ Mul e1' e2 | e1' <- QC.shrink e1] ++  [ Mul e1 e2' | e2' <- QC.shrink e2]
+  shrink (Sub e1 e2) = [ Sub e1' e2 | e1' <- QC.shrink e1] ++  [ Sub e1 e2' | e2' <- QC.shrink e2]

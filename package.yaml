@@ -20,6 +20,8 @@ internal-libraries:
       - Output
       - State
     other-modules: []
+    dependencies:
+      - mtl >= 2.2 && < 2.3
 tests:
   geo-server-test:
     source-dirs: tests/geo-server

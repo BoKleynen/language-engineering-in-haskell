@@ -71,6 +71,7 @@ test-suite arith-test
     , hedgehog >=0.5 && <1.1
     , tasty >=0.11 && <1.5
     , tasty-hedgehog >=0.1 && <1.1
+    , tasty-quickcheck ==0.10.*
   default-language: Haskell2010
 
 test-suite geo-server-test

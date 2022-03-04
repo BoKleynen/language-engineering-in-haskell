@@ -13,16 +13,16 @@ type M a = WriterT String (StateT Int (Except String)) a
 
 eval :: Term -> M Int
 eval term @ (Con n) = do
-    tell $ line term n
-    return n
+  tell (line term n)
+  return n
 eval term @ (Div t u) = do
-    a <- eval t
-    b <- eval u
-    when (b == 0) (throwError "divide by zero")
-    state (\s -> ((), s+1))
-    let result = a `div` b
-    tell $ line term result
-    return result
+  a <- eval t
+  b <- eval u
+  when (b == 0) (throwError "divide by zero")
+  state (\s -> ((), s+1))
+  let result = a `div` b
+  tell (line term result)
+  return result
 
 
 line :: Term -> Int -> String

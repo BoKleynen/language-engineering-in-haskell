@@ -46,3 +46,10 @@ tests:
       - tasty-hedgehog >= 0.1 && < 1.1
       - tasty-quickcheck >= 0.10 && < 0.11
       - hedgehog >= 0.5 && < 1.1
+  quick:
+    source-dirs: tests/quick
+    main: Test.hs
+    dependencies:
+      - QuickCheck >= 2.14 && < 2.15
+      - tasty >= 0.11 && < 1.5
+      - tasty-quickcheck >= 0.10 && < 0.11

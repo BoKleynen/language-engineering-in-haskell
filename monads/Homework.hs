@@ -9,7 +9,11 @@ data Term
   | Div Term Term
   deriving Show
 
-type M a = WriterT String (StateT Int (Except String)) a
+data EvalException
+  = DivideByZero
+  deriving Show
+
+type M = WriterT String (StateT Int (Except EvalException))
 
 eval :: Term -> M Int
 eval term @ (Con n) = do
@@ -18,23 +22,25 @@ eval term @ (Con n) = do
 eval term @ (Div t u) = do
   a <- eval t
   b <- eval u
-  when (b == 0) (throwError "divide by zero")
-  state (\s -> ((), s+1))
+  when (b == 0) (throwError DivideByZero)
+  tick
   let result = a `div` b
   tell (line term result)
   return result
 
+tick :: M ()
+tick = state (\s -> ((), s+1))
 
 line :: Term -> Int -> String
 line t a = "eval (" ++ show t ++ ") <= " ++ show a ++ "\n"
 
 
-runM :: M Int -> Either String ((Int, String), Int)
-runM m = runExcept $ runStateT (runWriterT m) 0
+runM :: M Int -> Either EvalException ((Int, String), Int)
+runM m = runExcept $ flip runStateT 0 $ runWriterT m
 
 printResult :: M Int -> IO ()
 printResult m = case runM m of
-  Left e -> putStrLn ("Error: " ++ e)
+  Left e -> putStrLn ("Error: " ++ show e)
   Right ((res, log), s) -> do
     putStrLn ("Result = " ++ show res)
     putStrLn (show s ++ " divisions")

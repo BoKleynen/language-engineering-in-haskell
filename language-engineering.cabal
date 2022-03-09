@@ -38,6 +38,19 @@ library geo-server
       base ==4.14.*
   default-language: Haskell2010
 
+library miniparsec
+  exposed-modules:
+      Miniparsec
+  other-modules:
+      Paths_language_engineering
+  autogen-modules:
+      Paths_language_engineering
+  hs-source-dirs:
+      miniparsec
+  build-depends:
+      base ==4.14.*
+  default-language: Haskell2010
+
 library monads
   exposed-modules:
       Basic

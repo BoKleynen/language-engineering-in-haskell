@@ -24,6 +24,10 @@ internal-libraries:
     source-dirs: arith
     exposed-modules:
       - Arith
+  miniparsec:
+    source-dirs: miniparsec
+    exposed-modules:
+      - Miniparsec
 tests:
   geo-server-test:
     source-dirs: tests/geo-server

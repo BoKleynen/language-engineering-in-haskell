@@ -17,22 +17,15 @@ data RE a where
   Eps :: a -> RE a
   Empty :: RE ()
 
-match' :: RE a  -> String -> Maybe (a, String)
-match' (Char c) (d:ds) | c == d     = Just (d,ds)
-                       | otherwise  = Nothing
-match' (Char c) []                  = Nothing
+match' :: RE a  -> String -> [(a, String)]
+match' (Char c) (d:ds) | c == d     = [(d,ds)]
+                       | otherwise  = []
+match' (Char c) []                  = []
 match' (Alt re1 re2) s = match' re1 s <|> match' re2 s
-match' (Cat f re1 re2) s = do
-  (x, s') <-  match' re1 s
-  (y, s'') <- match' re2 s'
-  return (f x y, s'')
-match' (Eps x) s = Just (x, s)
-match' Empty _ = Nothing
+match' (Cat f re1 re2) s = concatMap (\(x, s') -> map (\(y, s'') -> (f x y, s'')) $ match' re2 s') $ match' re1 s
+match' (Eps x) s = [(x, s)]
+match' Empty _ = []
 match' (Star re) s = match' (Alt (Cat (:) re (Star re)) (Eps [])) s
 
-match :: RE a -> String -> Maybe a
-match re s = do
-  (x, s') <- match' re s
-  if null s'
-    then Just x
-    else Nothing
+match :: RE a -> String -> [a]
+match re s = map fst . filter (\(_, s) -> null s) $ match' re s

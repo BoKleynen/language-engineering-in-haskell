@@ -3,6 +3,7 @@
 module Miniparsec where
 
 import Control.Applicative
+import Control.Monad (MonadPlus(mzero))
 
 data Expr
   = Con Int
@@ -17,19 +18,26 @@ data RE a where
   Eps :: a -> RE a
   Empty :: RE ()
 
-match' :: RE a  -> String -> [(a, String)]
-match' (Char c) (d:ds) | c == d     = [(d,ds)]
-                       | otherwise  = []
-match' (Char c) []                  = []
+match' :: MonadPlus m => RE a  -> String -> m (a, String)
+match' (Char c) (d:ds) | c == d     = pure (d,ds)
+                       | otherwise  = mzero
+match' (Char c) []                  = mzero
 match' (Alt re1 re2) s = match' re1 s <|> match' re2 s
 match' (Cat f re1 re2) s =
   do
     (x, s') <- match' re1 s
     (y, s'') <- match' re2 s'
     return (f x y, s'')
-match' (Eps x) s = [(x, s)]
-match' Empty _ = []
-match' (Star re) s = match' (Alt (Cat (:) re (Star re)) (Eps [])) s
+match' (Eps x) s = pure (x, s)
+match' Empty _ = mzero
+match' (Star re) s = match' (Alt (Cat (:) re (Star re)) (Eps mzero)) s
 
 match :: RE a -> String -> [a]
 match re s = map fst . filter (\(_, s) -> null s) $ match' re s
+
+matchMaybe :: RE a -> String -> Maybe a
+matchMaybe re s = do
+  (x, s') <- match' re s
+  if null s'
+    then Just x
+    else Nothing

@@ -22,7 +22,11 @@ match' (Char c) (d:ds) | c == d     = [(d,ds)]
                        | otherwise  = []
 match' (Char c) []                  = []
 match' (Alt re1 re2) s = match' re1 s <|> match' re2 s
-match' (Cat f re1 re2) s = concatMap (\(x, s') -> map (\(y, s'') -> (f x y, s'')) $ match' re2 s') $ match' re1 s
+match' (Cat f re1 re2) s =
+  do
+    (x, s') <- match' re1 s
+    (y, s'') <- match' re2 s'
+    return (f x y, s'')
 match' (Eps x) s = [(x, s)]
 match' Empty _ = []
 match' (Star re) s = match' (Alt (Cat (:) re (Star re)) (Eps [])) s

@@ -1,9 +1,13 @@
-module GeoServerDeepTest (geoServerDeepSpecs) where
+module GeoServerDeepTest (geoServerDeepSpecs, geoServerDeepQCProps) where
 
 import Test.Hspec
+import Test.QuickCheck((==>))
+import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Hspec
+import qualified Test.Tasty.QuickCheck as QC
 
 import GeoServerDeep
+import Control.Applicative (Applicative(liftA2))
 
 geoServerDeepSpecs :: Spec
 geoServerDeepSpecs = describe "GeoServerDeep" $ do
@@ -92,3 +96,31 @@ spec_translate =
 
       it "returns False when the point lies outside of the translated circle" $
         (0,0) `inRegion` translate direction (circle 1) `shouldBe` False
+
+geoServerDeepQCProps :: TestTree
+geoServerDeepQCProps = testGroup "quickcheck test"
+  [ QC.testProperty "points are inside a region or outside a reion" $
+      \(r, p) -> p `inRegion` r || p `inRegion` outside r
+  , QC.testProperty "points can't be inside a region and outside a region at the same time" $
+      \(r, p) -> p `inRegion` r && not (p `inRegion` outside r) || not (p `inRegion` r) && p `inRegion` outside r
+  , QC.testProperty "`inRegion` is preserved by translation" $
+      \(r, p@(px,py), d@(dx,dy)) ->  p `inRegion` r ==> (px+dx,py+dy) `inRegion` translate d r
+  , QC.testProperty "outside . outside is a nop" $
+      \r p -> p `inRegion` r ==> p `inRegion` outside (outside r)
+  ]
+
+instance QC.Arbitrary Region where
+  arbitrary =
+    QC.frequency [ (5, circle <$> QC.arbitrary)
+                 , (5, square <$> QC.arbitrary)
+                 , (2, liftA2 (/\) QC.arbitrary QC.arbitrary)
+                 , (2, outside <$> QC.arbitrary)
+                 , (2, translate <$> QC.arbitrary <*> QC.arbitrary)
+                 , (1, annulus <$> QC.arbitrary <*> QC.arbitrary)
+                 ]
+
+  shrink (Circle r) = [Circle r' | r' <- QC.shrink r]
+  shrink (Square s) = [Square s' | s' <- QC.shrink s]
+  shrink (Intersection r1 r2) = [Intersection r1' r2 | r1' <- QC.shrink r1] ++ [Intersection r1 r2' | r2' <- QC.shrink r2]
+  shrink (Outside r) = [Outside r' | r' <- QC.shrink r]
+  shrink (Translate d r) = [Translate d' r | d' <- QC.shrink d] ++ [Translate d r' | r' <- QC.shrink r]

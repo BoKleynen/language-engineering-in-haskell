@@ -38,8 +38,12 @@ tests:
     dependencies:
       - geo-server
       - tasty >= 1.4 && < 1.5
+      - tasty-hedgehog >= 0.1 && < 1.1
       - tasty-hspec >= 1.2 && < 1.3
+      - tasty-quickcheck >= 0.10 && < 0.11
+      - hedgehog >= 0.5 && < 1.1
       - hspec >= 2.9 && < 2.10
+      - QuickCheck >= 2.14 && < 2.15
   arith-test:
     source-dirs: tests/arith
     main: Test.hs

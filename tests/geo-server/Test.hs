@@ -13,7 +13,9 @@ main = do
     [ geoServerShallowSpecs
     , geoServerDeepSpecs
     ]
-  defaultMain (testGroup "All tests" [
-      testGroup "Specs" specs
+  defaultMain (testGroup "All tests"
+    [ testGroup "Specs" specs
+    , testGroup "properties"
+        [ geoServerDeepQCProps ]
     ])
 

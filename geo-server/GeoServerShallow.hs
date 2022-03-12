@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module GeoServerShallow where
 
 import Control.Applicative ( Applicative(liftA2) )
@@ -8,7 +10,7 @@ type Point = (Double, Double)
 -- - more efficient
 -- - not as flexible in terms of interpretation
 -- - easier to add new kinds of regions
-type Region = Point -> Bool
+newtype Region = Region { contains :: Point -> Bool }
 
 type Radius = Double
 
@@ -17,25 +19,24 @@ type Side = Double
 type Direction = (Double, Double)
 
 inRegion :: Point -> Region -> Bool
-p `inRegion` r = r p
+p `inRegion` Region { .. } = contains p
 
 circle :: Radius -> Region
-circle r (x,y) = x**2 + y**2 <= r**2
+circle r = Region { contains = \(x,y) -> x**2 + y**2 <= r**2 }
 
 square :: Side -> Region
-square s (x,y) = abs x <= s / 2 && abs y <= s / 2
-
+square s = Region { contains = \(x,y) -> abs x <= s / 2 && abs y <= s / 2 }
 outside :: Region -> Region
-outside r = not . r
+outside Region { .. } = Region { contains = not . contains }
 
 (/\) :: Region -> Region -> Region
-(/\) = liftA2 (&&)
+r1 /\ r2 = Region { contains = \p -> p `inRegion` r1 && p `inRegion` r2 }
 
 annulus :: Radius -> Radius -> Region
 annulus r1 r2 = outside (circle r1) /\ circle r2
 
 translate :: Direction -> Region -> Region
-translate (dx,dy) r (x,y) = r (x-dx, y-dy)
+translate (dx,dy) Region { .. } = Region { contains = \(x,y) -> contains (x-dx, y-dy) }
 
 -- toString :: Region -> String
 -- toString can't be implemented with this representation of a

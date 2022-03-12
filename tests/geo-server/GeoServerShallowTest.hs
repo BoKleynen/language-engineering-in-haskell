@@ -1,8 +1,19 @@
-module GeoServerShallowTest (geoServerShallowSpecs) where
+module GeoServerShallowTest (geoServerShallowSpecs, geoServerShallowQCProps, geoServerShallowHedgehogProps) where
 
+import Control.Applicative
+import Hedgehog ( (===), assert, forAll, property, Gen )
 import Test.Hspec
+import Test.QuickCheck((==>))
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.Hedgehog
+import Test.Tasty.Hspec
+
+import qualified Test.Tasty.QuickCheck as QC
+import qualified Hedgehog.Gen as Gen
+import qualified Hedgehog.Range as Range
 
 import GeoServerShallow
+
 
 geoServerShallowSpecs :: Spec
 geoServerShallowSpecs = describe "GeoServerShallow" $ do
@@ -91,3 +102,69 @@ spec_translate =
 
       it "returns False when the point lies outside of the translated circle" $
         (0,0) `inRegion` translate direction (circle 1) `shouldBe` False
+
+geoServerShallowQCProps :: TestTree
+geoServerShallowQCProps = testGroup "quickcheck test"
+  [ QC.testProperty "points are inside a region or outside a reion" $
+      \(r, p) -> p `inRegion` r || p `inRegion` outside r
+
+  , QC.testProperty "points can't be inside and outside a region" $
+      \(r, p) -> not $ p `inRegion` r && p `inRegion` outside r
+
+  , QC.testProperty "`inRegion` is preserved by translation" $
+      \(r, p@(px,py), d@(dx,dy)) ->  p `inRegion` r == (px+dx,py+dy) `inRegion` translate d r
+
+  , QC.testProperty "outside of outside is inside" $
+      \r p -> p `inRegion` r == p `inRegion` outside (outside r)
+  ]
+
+geoServerShallowHedgehogProps :: TestTree
+geoServerShallowHedgehogProps = testGroup "hedgehog tests"
+  [ testProperty "" $ property $ do
+      r <- forAll genRegion
+      p <- forAll genPoint
+      assert (p `inRegion` r || p `inRegion` outside r)
+
+  , testProperty "" $ property $ do
+      r <- forAll genRegion
+      p <- forAll genPoint
+      assert (not $ p `inRegion` r && p `inRegion` outside r)
+
+  , testProperty "`inRegion` is preserved by translation" $ property $ do
+      r <- forAll genRegion
+      p@(px,py) <- forAll genPoint
+      d@(dx,dy) <- forAll genPoint
+      p `inRegion` r === (px+dx,py+dy) `inRegion` translate d r
+
+  , testProperty "outside of outside is inside" $ property $ do
+      r <- forAll genRegion
+      p <- forAll genPoint
+      p `inRegion` r === p `inRegion` outside (outside r)
+  ]
+
+-- QC requires generated input to be an instance of Show
+instance Show Region where
+  show _ = "<region>"
+
+instance QC.Arbitrary Region where
+  arbitrary =
+    QC.frequency [ (5, circle <$> QC.arbitrary)
+                 , (5, square <$> QC.arbitrary)
+                 , (2, liftA2 (/\) QC.arbitrary QC.arbitrary)
+                 , (2, outside <$> QC.arbitrary)
+                 , (2, translate <$> QC.arbitrary <*> QC.arbitrary)
+                 , (1, annulus <$> QC.arbitrary <*> QC.arbitrary)
+                 ]
+
+genRegion :: Gen Region
+genRegion =
+  Gen.frequency [ (5, circle <$> Gen.double (Range.linearFrac 0 100))
+                , (5, square <$> Gen.double (Range.linearFrac 0 100))
+                , (2, liftA2 (/\) genRegion genRegion)
+                , (2, outside <$> genRegion)
+                , (2, translate <$> genPoint <*> genRegion)
+                , (1, annulus <$> Gen.double (Range.linearFrac 0 100) <*> Gen.double (Range.linearFrac 0 100))
+                ]
+
+genPoint :: Gen Point
+genPoint = (,) <$> Gen.double (Range.linearFrac 0 100) <*> Gen.double (Range.linearFrac 0 100)

@@ -100,13 +100,16 @@ spec_translate =
 geoServerDeepQCProps :: TestTree
 geoServerDeepQCProps = testGroup "quickcheck test"
   [ QC.testProperty "points are inside a region or outside a reion" $
-      \(r, p) -> p `inRegion` r || p `inRegion` outside r
-  , QC.testProperty "points can't be inside a region and outside a region at the same time" $
-      \(r, p) -> p `inRegion` r && not (p `inRegion` outside r) || not (p `inRegion` r) && p `inRegion` outside r
+      \r p -> p `inRegion` r || p `inRegion` outside r
+
+  , QC.testProperty "points can't be inside and outside a region" $
+      \r p -> not $ p `inRegion` r && p `inRegion` outside r
+
   , QC.testProperty "`inRegion` is preserved by translation" $
-      \(r, p@(px,py), d@(dx,dy)) ->  p `inRegion` r ==> (px+dx,py+dy) `inRegion` translate d r
-  , QC.testProperty "outside . outside is a nop" $
-      \r p -> p `inRegion` r ==> p `inRegion` outside (outside r)
+      \r p@(px,py) d@(dx,dy) ->  p `inRegion` r == (px+dx,py+dy) `inRegion` translate d r
+
+  , QC.testProperty "outside of outside is inside" $
+      \r p -> p `inRegion` r == p `inRegion` outside (outside r)
   ]
 
 instance QC.Arbitrary Region where

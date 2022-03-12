@@ -16,6 +16,9 @@ main = do
   defaultMain (testGroup "All tests"
     [ testGroup "Specs" specs
     , testGroup "properties"
-        [ geoServerDeepQCProps ]
+        [ geoServerDeepQCProps
+        , geoServerShallowQCProps
+        , geoServerShallowHedgehogProps
+        ]
     ])
 

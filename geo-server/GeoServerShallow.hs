@@ -2,8 +2,6 @@
 
 module GeoServerShallow where
 
-import Control.Applicative ( Applicative(liftA2) )
-
 type Point = (Double, Double)
 
 -- Shallow embedding:

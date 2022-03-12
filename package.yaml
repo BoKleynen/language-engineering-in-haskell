@@ -1,4 +1,6 @@
 name: language-engineering
+github: BoKleynen/language-engineering-in-haskell
+author: Bo Kleynen
 version: 0.1.0
 description: |
   This package contains some code snippets I wrote for the language engineering topic of

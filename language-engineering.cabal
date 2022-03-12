@@ -9,7 +9,15 @@ version:        0.1.0
 description:    This package contains some code snippets I wrote for the language engineering topic of
                 the course Capita Selecta Computer Science: Artificial Intelligence [H05N0A] at KU Leuven
                 (https://onderwijsaanbod.kuleuven.be/2021/syllabi/e/H05N0AE.htm#activetab=doelstellingen_idp1606608).
+homepage:       https://github.com/BoKleynen/language-engineering-in-haskell#readme
+bug-reports:    https://github.com/BoKleynen/language-engineering-in-haskell/issues
+author:         Bo Kleynen
+maintainer:     Bo Kleynen
 build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/BoKleynen/language-engineering-in-haskell
 
 library arith
   exposed-modules:

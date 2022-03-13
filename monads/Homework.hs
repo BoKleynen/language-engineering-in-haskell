@@ -16,10 +16,10 @@ data EvalException
 type M = WriterT String (StateT Int (Except EvalException))
 
 eval :: Term -> M Int
-eval term @ (Con n) = do
+eval term@(Con n) = do
   tell (line term n)
   return n
-eval term @ (Div t u) = do
+eval term@(Div t u) = do
   a <- eval t
   b <- eval u
   when (b == 0) (throwError DivideByZero)

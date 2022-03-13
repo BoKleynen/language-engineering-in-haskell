@@ -14,7 +14,7 @@ expr :: Parser Expr
 expr = atom `chainl1` pure App
 
 atom :: Parser Expr
-atom = lam <|> local <|> var <|> paren
+atom = lam +++ local +++ var +++ paren
 
 lam :: Parser Expr
 lam = do -- Lam <$ symbol "\\" <*> variable <* symbol "->" <*> expr

@@ -178,21 +178,21 @@ identifier ks = do
   return x
 
 
-expr :: Parser Int
-expr = factor `chainl1` addop
+-- expr :: Parser Int
+-- expr = factor `chainl1` addop
 
-term :: Parser Int
-term = factor `chainr1` expop
+-- term :: Parser Int
+-- term = factor `chainr1` expop
 
-addop :: Parser (Int -> Int -> Int)
-addop = ops [(char '+', (+)), (char '-', (-))]
+-- addop :: Parser (Int -> Int -> Int)
+-- addop = ops [(char '+', (+)), (char '-', (-))]
 
-expop :: Parser (Int -> Int -> Int)
-expop = ops [(char '^', (^))]
+-- expop :: Parser (Int -> Int -> Int)
+-- expop = ops [(char '^', (^))]
 
-factor :: Parser Int
-factor = nat <|> bracket (char '(') expr (char ')')
+-- factor :: Parser Int
+-- factor = nat <|> bracket (char '(') expr (char ')')
 
 
-eval :: Parser Int
-eval = nat <**> ops [(char '+', (+)), (char '-', (-))] <*> nat
+-- eval :: Parser Int
+-- eval = nat <**> ops [(char '+', (+)), (char '-', (-))] <*> nat

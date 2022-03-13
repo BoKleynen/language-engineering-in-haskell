@@ -10,6 +10,7 @@ import Control.Applicative
 import Control.Monad
 import Data.Char
 
+
 newtype Parser a = Parser { run :: String -> [(a, String)] }
   deriving (Functor)
 
@@ -66,7 +67,7 @@ lower :: Parser Char
 lower = sat \x -> 'a' <= x && x <= 'z'
 
 upper :: Parser Char
-upper = sat \x -> 'A' <= x && x <= 'z'
+upper = sat \x -> 'A' <= x && x <= 'Z'
 
 letter :: Parser Char
 letter = lower <|> upper

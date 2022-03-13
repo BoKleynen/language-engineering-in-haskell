@@ -30,6 +30,7 @@ internal-libraries:
     source-dirs: miniparsec
     exposed-modules:
       - Expr
+      - Miniparsec
 tests:
   geo-server-test:
     source-dirs: tests/geo-server

@@ -49,6 +49,7 @@ library geo-server
 library miniparsec
   exposed-modules:
       Expr
+      Miniparsec
   other-modules:
       Paths_language_engineering
   autogen-modules:

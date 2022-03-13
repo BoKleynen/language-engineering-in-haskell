@@ -1,6 +1,6 @@
 {-# LANGUAGE GADTs #-}
 
-module Miniparsec where
+module Expr where
 
 import Control.Applicative
 import Control.Monad (MonadPlus(mzero))

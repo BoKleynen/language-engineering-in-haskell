@@ -28,8 +28,11 @@ internal-libraries:
       - Arith
   miniparsec:
     source-dirs: miniparsec
+    dependencies:
+      - mtl >= 2.2 && < 2.3
     exposed-modules:
       - Miniparsec
+      - Miniparsec2
     other-modules:
       - Expr
       - Lambda

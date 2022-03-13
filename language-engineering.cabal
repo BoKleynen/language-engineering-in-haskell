@@ -49,6 +49,7 @@ library geo-server
 library miniparsec
   exposed-modules:
       Miniparsec
+      Miniparsec2
   other-modules:
       Expr
       Lambda
@@ -56,6 +57,7 @@ library miniparsec
       miniparsec
   build-depends:
       base ==4.14.*
+    , mtl ==2.2.*
   default-language: Haskell2010
 
 library monads

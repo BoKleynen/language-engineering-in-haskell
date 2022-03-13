@@ -19,6 +19,9 @@ runParser Parser { .. } = run
 parser :: (String -> [(a, String)]) -> Parser a
 parser f = Parser { run = f }
 
+instance Semigroup (Parser a) where
+  p <> q = parser \s -> runParser p s <> runParser q s
+
 instance Applicative Parser where
   pure :: a -> Parser a
   pure v = parser \s -> [(v, s)]
@@ -38,7 +41,7 @@ instance Alternative Parser where
   empty = parser $ const []
 
   (<|>) :: Parser a -> Parser a -> Parser a
-  p <|> q = parser \s -> runParser p s <|> runParser q s
+  p <|> q = first (p <> q)
 
 instance MonadPlus Parser where
   mzero = empty
@@ -95,13 +98,13 @@ nat = fmap (\x -> ord x - ord '0') digit `chainl1` pure op
 int :: Parser Int
 int = op <*> nat
   where
-    op = char '-' >> pure negate <|> pure id
+    op = char '-' >> pure negate <> pure id
 
 ints :: Parser [Int]
 ints = bracket (char '[') (int `sepBy1` char ',') (char ']')
 
 sepBy :: Parser a -> Parser b -> Parser [a]
-p `sepBy` sep = p `sepBy1` sep <|> pure []
+p `sepBy` sep = p `sepBy1` sep <> pure []
 
 sepBy1 :: Parser a -> Parser b -> Parser [a]
 p `sepBy1` sep = liftM2 (:) p (many (sep >> p))
@@ -110,39 +113,36 @@ bracket :: Parser a -> Parser b -> Parser c -> Parser b
 bracket open p close = open *> p <* close
 
 chainl :: Parser a -> Parser (a -> a -> a) -> a -> Parser a
-chainl p op v = chainl1 p op <|> pure v
+chainl p op v = chainl1 p op <> pure v
 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
 chainl1 p op = p >>= rest
   where
-    rest x = (op <*> pure x <*> p) <|> pure x
+    rest x = (op <*> pure x <*> p) <> pure x
 
 chainr :: Parser a -> Parser (a -> a -> a) -> a -> Parser a
-chainr p op v = chainr1 p op <|> pure v
+chainr p op v = chainr1 p op <> pure v
 
 chainr1 :: Parser a -> Parser (a -> a -> a) -> Parser a
 chainr1 p op = do
   x <- p
   f <- op
   y <- chainr1 p op
-  pure (f x y) <|> pure x
+  pure (f x y) <> pure x
 
 ops :: [(Parser a, b)] -> Parser b
-ops xs = foldr1 (<|>) [p >> pure op | (p,op) <- xs]
+ops xs = foldr1 (<>) [p >> pure op | (p,op) <- xs]
 
 first :: Parser a -> Parser a
 first p = parser \s -> case runParser p s of
   [] -> []
   (x:_) -> [x]
 
-(+++) :: Parser a -> Parser a -> Parser a
-p +++ q = first (p <|> q)
-
 number :: Parser Int
-number = nat +++ pure 0
+number = nat <|> pure 0
 
 colour :: Parser String
-colour = string "yellow" +++ string "orange"
+colour = string "yellow" <|> string "orange"
 
 spaces :: Parser ()
 spaces = void $ some (sat isSpace)
@@ -154,7 +154,7 @@ comment :: Parser ()
 comment = void $ string "--" >> many (sat (/= '\n'))
 
 junk :: Parser ()
-junk = void $ many (spaces +++ comment)
+junk = void $ many (spaces <|> comment)
 
 parse :: Parser a -> Parser a
 parse p = junk >> p

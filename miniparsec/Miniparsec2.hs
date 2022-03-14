@@ -8,7 +8,7 @@ import Control.Monad.State
 import Data.Char
 
 
-type Parser a = StateT String [] a
+type Parser = StateT String []
 
 runParser :: Parser a -> String -> [(a, String)]
 runParser = runStateT
@@ -17,7 +17,10 @@ parser :: (String -> [(a, String)]) -> Parser a
 parser = StateT
 
 item :: Parser Char
-item = state \(c:cs) -> (c,cs)
+item = do
+  (c:cs) <- get
+  put cs
+  return c
 
 -- All the functions that follow are implemented exactly the same
 -- as in Miniparsec
@@ -49,11 +52,7 @@ word :: Parser String
 word = many letter
 
 string :: String -> Parser String
-string ""       =  pure ""
-string s@(x:xs) = do
-  char x
-  string xs
-  return s
+string = mapM char
 
 ident :: Parser String
 ident = liftM2 (:) lower (many alphanum)
@@ -117,9 +116,6 @@ colour = string "yellow" +++ string "orange"
 
 spaces :: Parser ()
 spaces = void $ some (sat isSpace)
-  where
-    isSpace :: Char -> Bool
-    isSpace x = x == ' ' || x == '\n' || x == '\t'
 
 comment :: Parser ()
 comment = void $ string "--" >> many (sat (/= '\n'))
@@ -145,5 +141,5 @@ symbol xs = token (string xs)
 identifier :: [String] -> Parser String
 identifier ks = do
   x <- ident
-  guard (notElem x ks)
+  guard (x `notElem` ks)
   return x

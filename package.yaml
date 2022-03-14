@@ -8,6 +8,8 @@ description: |
   (https://onderwijsaanbod.kuleuven.be/2021/syllabi/e/H05N0AE.htm#activetab=doelstellingen_idp1606608).
 tested-with: GHC == 8.10.7, GHC == 9.0.2
 dependencies: base >=4.14 && <4.16
+ghc-options:
+  - -fwarn-incomplete-uni-patterns
 internal-libraries:
   geo-server:
     source-dirs: geo-server

@@ -30,6 +30,7 @@ library arith
       Paths_language_engineering
   hs-source-dirs:
       arith
+  ghc-options: -fwarn-incomplete-uni-patterns
   build-depends:
       base >=4.14 && <4.16
   default-language: Haskell2010
@@ -44,6 +45,7 @@ library geo-server
       Paths_language_engineering
   hs-source-dirs:
       geo-server
+  ghc-options: -fwarn-incomplete-uni-patterns
   build-depends:
       base >=4.14 && <4.16
   default-language: Haskell2010
@@ -57,6 +59,7 @@ library miniparsec
       Lambda
   hs-source-dirs:
       miniparsec
+  ghc-options: -fwarn-incomplete-uni-patterns
   build-depends:
       base >=4.14 && <4.16
     , mtl ==2.2.*
@@ -75,6 +78,7 @@ library monads
       Paths_language_engineering
   hs-source-dirs:
       monads
+  ghc-options: -fwarn-incomplete-uni-patterns
   build-depends:
       base >=4.14 && <4.16
     , mtl ==2.2.*
@@ -89,6 +93,7 @@ test-suite arith-test
       Paths_language_engineering
   hs-source-dirs:
       tests/arith
+  ghc-options: -fwarn-incomplete-uni-patterns
   build-depends:
       QuickCheck ==2.14.*
     , arith
@@ -107,6 +112,7 @@ test-suite geo-server-test
       GeoServerDeepTest
   hs-source-dirs:
       tests/geo-server
+  ghc-options: -fwarn-incomplete-uni-patterns
   build-depends:
       QuickCheck ==2.14.*
     , base >=4.14 && <4.16
@@ -128,6 +134,7 @@ test-suite quick
       Paths_language_engineering
   hs-source-dirs:
       tests/quick
+  ghc-options: -fwarn-incomplete-uni-patterns
   build-depends:
       QuickCheck ==2.14.*
     , base >=4.14 && <4.16

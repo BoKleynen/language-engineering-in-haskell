@@ -32,7 +32,7 @@ instance Monad Parser where
 
 instance Alternative Parser where
   empty :: Parser a
-  empty = parser $ const []
+  empty = parser (const empty)
 
   (<|>) :: Parser a -> Parser a -> Parser a
   p <|> q = parser \s -> runParser p s <|> runParser q s
@@ -75,11 +75,7 @@ word :: Parser String
 word = many letter
 
 string :: String -> Parser String
-string ""       =  pure ""
-string s@(x:xs) = do
-  char x
-  string xs
-  return s
+string = mapM char
 
 ident :: Parser String
 ident = liftM2 (:) lower (many alphanum)
@@ -143,9 +139,6 @@ colour = string "yellow" +++ string "orange"
 
 spaces :: Parser ()
 spaces = void $ some (sat isSpace)
-  where
-    isSpace :: Char -> Bool
-    isSpace x = x == ' ' || x == '\n' || x == '\t'
 
 comment :: Parser ()
 comment = void $ string "--" >> many (sat (/= '\n'))

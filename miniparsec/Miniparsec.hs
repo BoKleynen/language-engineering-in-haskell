@@ -24,10 +24,7 @@ instance Applicative Parser where
   pure v = parser \s -> [(v, s)]
 
   (<*>) :: Parser (a -> b) -> Parser a -> Parser b
-  g <*> x = do
-    f <- g
-    y <- x
-    return (f y)
+  g <*> x = g >>= flip fmap x
 
 instance Monad Parser where
   (>>=) :: Parser a -> (a -> Parser b) -> Parser b
@@ -174,7 +171,7 @@ symbol xs = token (string xs)
 identifier :: [String] -> Parser String
 identifier ks = do
   x <- ident
-  guard (notElem x ks)
+  guard (x `notElem` ks)
   return x
 
 

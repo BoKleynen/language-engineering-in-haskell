@@ -18,7 +18,7 @@ import GeoServerShallow
 
 
 geoServerShallowSpecs :: Spec
-geoServerShallowSpecs = describe "GeoServerShallow" $ do
+geoServerShallowSpecs = describe "GeoServerShallow" do
     spec_circle
     spec_square
     spec_intersection

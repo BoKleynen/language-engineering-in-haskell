@@ -12,7 +12,7 @@ import GeoServerDeep
 import Control.Applicative (Applicative(liftA2))
 
 geoServerDeepSpecs :: Spec
-geoServerDeepSpecs = describe "GeoServerDeep" $ do
+geoServerDeepSpecs = describe "GeoServerDeep" do
     spec_circle
     spec_square
     spec_intersection

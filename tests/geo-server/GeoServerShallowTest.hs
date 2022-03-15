@@ -5,10 +5,8 @@ module GeoServerShallowTest (geoServerShallowSpecs, geoServerShallowQCProps, geo
 import Control.Applicative
 import Hedgehog ( (===), assert, forAll, property, Gen )
 import Test.Hspec
-import Test.QuickCheck((==>))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Hedgehog
-import Test.Tasty.Hspec
 
 import qualified Test.Tasty.QuickCheck as QC
 import qualified Hedgehog.Gen as Gen

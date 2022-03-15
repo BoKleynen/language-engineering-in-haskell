@@ -21,7 +21,7 @@ data RE a where
 match' :: MonadPlus m => RE a  -> String -> m (a, String)
 match' (Char c) (d:ds) | c == d     = pure (d,ds)
                        | otherwise  = mzero
-match' (Char c) []                  = mzero
+match' (Char _) []                  = mzero
 match' (Alt re1 re2) s = match' re1 s <|> match' re2 s
 match' (Cat f re1 re2) s =
   do
@@ -33,7 +33,7 @@ match' Empty _ = mzero
 match' (Star re) s = match' (Alt (Cat (:) re (Star re)) (Eps mzero)) s
 
 match :: RE a -> String -> [a]
-match re s = map fst . filter (\(_, s) -> null s) $ match' re s
+match re s = map fst . filter (\(_, s') -> null s') $ match' re s
 
 matchMaybe :: RE a -> String -> Maybe a
 matchMaybe re s = do

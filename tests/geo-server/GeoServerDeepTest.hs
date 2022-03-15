@@ -3,9 +3,7 @@
 module GeoServerDeepTest (geoServerDeepSpecs, geoServerDeepQCProps) where
 
 import Test.Hspec
-import Test.QuickCheck((==>))
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.Hspec
 import qualified Test.Tasty.QuickCheck as QC
 
 import GeoServerDeep

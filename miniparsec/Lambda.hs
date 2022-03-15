@@ -1,6 +1,5 @@
 module Lambda where
 
-import Control.Applicative
 import Miniparsec
 
 

@@ -16,7 +16,7 @@ atom :: Parser Expr
 atom = lam +++ local +++ var +++ paren
 
 lam :: Parser Expr
-lam = do -- Lam <$ symbol "\\" <*> variable <* symbol "->" <*> expr
+lam = do
   symbol "\\"
   x <- variable
   symbol "->"

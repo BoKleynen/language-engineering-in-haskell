@@ -16,6 +16,14 @@ ghc-options:
   - -Wincomplete-record-updates
   - -Wno-orphans
   - -Wno-unused-do-bind
+executables:
+  th:
+    source-dirs: th
+    main: Main.hs
+    other-modules:
+      - Lib
+    dependencies:
+      - template-haskell >= 2.13 && <2.17
 internal-libraries:
   geo-server:
     source-dirs: geo-server

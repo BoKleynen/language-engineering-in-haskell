@@ -24,6 +24,7 @@ circle r = Region { contains = \(x,y) -> x**2 + y**2 <= r**2 }
 
 square :: Side -> Region
 square s = Region { contains = \(x,y) -> abs x <= s / 2 && abs y <= s / 2 }
+
 outside :: Region -> Region
 outside Region { .. } = Region { contains = not . contains }
 

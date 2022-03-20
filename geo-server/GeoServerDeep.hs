@@ -18,7 +18,7 @@ data Region
   | Outside Region
   | Square Side
   | Translate Direction Region
-  deriving (Show)
+  deriving (Show, Eq)
 
 inRegion :: Point -> Region -> Bool
 inRegion (x,y) (Circle r) = x**2 + y**2 <= r**2

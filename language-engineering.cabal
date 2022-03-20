@@ -125,6 +125,7 @@ test-suite geo-server-test
   other-modules:
       GeoServerShallowTest
       GeoServerDeepTest
+      ParserTest
   hs-source-dirs:
       tests/geo-server
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wno-orphans -Wno-unused-do-bind

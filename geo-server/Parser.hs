@@ -1,12 +1,12 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE BlockArguments #-}
-module Parser where
+
+module Parser (parseRegion, parseRegions) where
 
 import Text.Parsec
 import Numeric (readFloat, readSigned)
 import Control.Applicative ( Alternative(empty) )
 import Text.ParserCombinators.Parsec hiding (runParser, try)
-import Text.Parsec.Expr
 
 import GeoServerDeep
 
@@ -15,23 +15,32 @@ parseRegions :: String -> Either ParseError [Region]
 parseRegions = parse pRegions ""
 
 pRegions :: CharParser st [Region]
-pRegions = sepEndBy pRegion newline
+pRegions = sepEndBy pIntersect newline
 
 parseRegion :: String -> Either ParseError Region
-parseRegion = parse pRegion ""
+parseRegion = parse pIntersect ""
 
-pRegion :: CharParser st Region
-pRegion = buildExpressionParser table pRegionTerm
+pIntersect :: CharParser st Region
+pIntersect = chainl1 pTranslate op
   where
-    table = [ [ prefix "!" outside]
-            , [ binary "/\\" (/\) AssocLeft ]
-            ]
+    op = (/\) <$ string "/\\"
 
-    prefix name fun = Prefix do{ string name; return fun }
-    binary name fun = Infix do{ string name; return fun }
+pTranslate :: CharParser st Region
+pTranslate = do
+    r <- pOutside
+    rest r <|> return r
+  where
+    rest r = do
+      string "->"
+      d <- pDirection
+      return (Translate d r)
+
+pOutside :: CharParser st Region
+pOutside = outside <$> (char '!' *> pRegionTerm)
+        <|> pRegionTerm
 
 pRegionTerm :: CharParser st Region
-pRegionTerm = between (char '|') (char '|') pRegion
+pRegionTerm = between (char '|') (char '|') pIntersect
            <|> pRegionLit
 
 pRegionLit :: CharParser st Region
@@ -42,6 +51,15 @@ pCircle = circle <$> between (char '(') (char ')') pNumber
 
 pSquare :: CharParser st Region
 pSquare = square <$> between (char '[') (char ']') pNumber
+
+pDirection :: CharParser st Direction
+pDirection = do
+  char '('
+  dx <- pNumber
+  char ','
+  dy <- pNumber
+  char ')'
+  return (dx, dy)
 
 pNumber :: CharParser st Double
 pNumber = do

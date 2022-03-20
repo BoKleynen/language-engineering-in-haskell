@@ -22,6 +22,9 @@ internal-libraries:
     exposed-modules:
       - GeoServerShallow
       - GeoServerDeep
+      - Parser
+    dependencies:
+      - parsec >= 3.1 && < 3.2
   monads:
     source-dirs: monads
     exposed-modules:
@@ -37,14 +40,14 @@ internal-libraries:
       - Arith
   miniparsec:
     source-dirs: miniparsec
-    dependencies:
-      - mtl >= 2.2 && < 2.3
     exposed-modules:
       - Miniparsec
       - Miniparsec2
     other-modules:
       - Expr
       - Lambda
+    dependencies:
+      - mtl >= 2.2 && < 2.3
   th:
     source-dirs: th
     exposed-modules:

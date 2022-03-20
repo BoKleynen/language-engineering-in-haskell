@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+-- {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE BlockArguments #-}
 
 module Parser (parseRegion, parseRegions) where

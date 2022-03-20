@@ -3,10 +3,11 @@
 
 module Parser (parseRegion, parseRegions) where
 
-import Text.Parsec
-import Numeric (readFloat, readSigned)
 import Control.Applicative ( Alternative(empty) )
-import Text.ParserCombinators.Parsec hiding (runParser, try)
+import Numeric (readFloat, readSigned)
+
+import Text.Parsec
+import Text.ParserCombinators.Parsec
 
 import GeoServerDeep
 
@@ -23,7 +24,7 @@ parseRegion = parse pIntersect ""
 pIntersect :: CharParser st Region
 pIntersect = chainl1 pTranslate op
   where
-    op = (/\) <$ string "/\\"
+    op = Intersection <$ symbol "/\\"
 
 pTranslate :: CharParser st Region
 pTranslate = do
@@ -31,34 +32,36 @@ pTranslate = do
     rest r <|> return r
   where
     rest r = do
-      string "->"
+      symbol "->"
       d <- pDirection
       return (Translate d r)
 
 pOutside :: CharParser st Region
-pOutside = outside <$> (char '!' *> pRegionTerm)
+pOutside = Outside <$> (symbol "!" *> pRegionTerm)
         <|> pRegionTerm
 
 pRegionTerm :: CharParser st Region
-pRegionTerm = between (char '|') (char '|') pIntersect
+pRegionTerm = between (symbol "|") (symbol "|") pIntersect
            <|> pRegionLit
 
 pRegionLit :: CharParser st Region
 pRegionLit = pCircle <|> pSquare
 
 pCircle :: CharParser st Region
-pCircle = circle <$> between (char '(') (char ')') pNumber
+pCircle = circle <$> between (char '(') (symbol ")") pNumber
 
 pSquare :: CharParser st Region
-pSquare = square <$> between (char '[') (char ']') pNumber
+pSquare = square <$> between (char '[') (symbol "]") pNumber
 
 pDirection :: CharParser st Direction
 pDirection = do
-  char '('
+  symbol "("
   dx <- pNumber
-  char ','
+  spaces
+  symbol ","
   dy <- pNumber
-  char ')'
+  spaces
+  symbol ")"
   return (dx, dy)
 
 pNumber :: CharParser st Double
@@ -67,3 +70,6 @@ pNumber = do
   case readSigned readFloat s of
     [(n, s')] -> n <$ setInput s'
     _         -> empty
+
+symbol :: String -> CharParser st String
+symbol s = string s <* spaces

@@ -1,5 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
+module Th where
+
 import Lib
 
 -- f x = $(power 3) x

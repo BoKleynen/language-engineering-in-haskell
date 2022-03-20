@@ -24,9 +24,11 @@ pRegion :: CharParser st Region
 pRegion = buildExpressionParser table pRegionTerm
   where
     table = [ [ prefix "!" outside]
+            , [ binary "/\\" (/\) AssocLeft ]
             ]
 
-    prefix  name fun = Prefix do{ string name; return fun }
+    prefix name fun = Prefix do{ string name; return fun }
+    binary name fun = Infix do{ string name; return fun }
 
 pRegionTerm :: CharParser st Region
 pRegionTerm = between (char '|') (char '|') pRegion

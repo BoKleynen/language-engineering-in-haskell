@@ -4,28 +4,28 @@ module Parser (parseRegion, parseRegions) where
 
 import Control.Applicative ( Alternative(empty) )
 import Numeric (readFloat, readSigned)
-
 import Text.Parsec
-import Text.ParserCombinators.Parsec
 
 import GeoServerDeep
 
 
+type Parser a = Parsec String () a
+
 parseRegions :: String -> Either ParseError [Region]
 parseRegions = parse pRegions ""
 
-pRegions :: CharParser st [Region]
+pRegions :: Parser [Region]
 pRegions = sepEndBy pIntersect newline
 
 parseRegion :: String -> Either ParseError Region
 parseRegion = parse pIntersect ""
 
-pIntersect :: CharParser st Region
+pIntersect :: Parser Region
 pIntersect = chainl1 pTranslate op
   where
     op = Intersection <$ symbol "/\\"
 
-pTranslate :: CharParser st Region
+pTranslate :: Parser Region
 pTranslate = do
     r <- pOutside
     rest r <|> return r
@@ -35,40 +35,39 @@ pTranslate = do
       d <- pDirection
       return (Translate d r)
 
-pOutside :: CharParser st Region
+pOutside :: Parser Region
 pOutside = Outside <$> (symbol "!" *> pRegionTerm)
         <|> pRegionTerm
 
-pRegionTerm :: CharParser st Region
+pRegionTerm :: Parser Region
 pRegionTerm = between (symbol "|") (symbol "|") pIntersect
            <|> pRegionLit
 
-pRegionLit :: CharParser st Region
+pRegionLit :: Parser Region
 pRegionLit = pCircle <|> pSquare
 
-pCircle :: CharParser st Region
-pCircle = circle <$> between (char '(') (symbol ")") pNumber
+pCircle :: Parser Region
+pCircle = Circle <$> between (char '(') (symbol ")") pNumber
 
-pSquare :: CharParser st Region
-pSquare = square <$> between (char '[') (symbol "]") pNumber
+pSquare :: Parser Region
+pSquare = Square <$> between (char '[') (symbol "]") pNumber
 
-pDirection :: CharParser st Direction
-pDirection = do
-  symbol "("
-  dx <- pNumber
-  spaces
+pDirection :: Parser Direction
+pDirection = between (symbol "(") (symbol ")") do
+  dx <- lexeme pNumber
   symbol ","
-  dy <- pNumber
-  spaces
-  symbol ")"
+  dy <- lexeme pNumber
   return (dx, dy)
 
-pNumber :: CharParser st Double
+pNumber :: Parser Double
 pNumber = do
   s <- getInput
   case readSigned readFloat s of
     [(n, s')] -> n <$ setInput s'
     _         -> empty
 
-symbol :: String -> CharParser st String
-symbol s = string s <* spaces
+symbol :: String -> Parser String
+symbol = lexeme . string
+
+lexeme :: Parser a -> Parser a
+lexeme p = p <* spaces

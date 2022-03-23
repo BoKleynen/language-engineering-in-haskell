@@ -15,10 +15,13 @@ parseRegions :: String -> Either ParseError [Region]
 parseRegions = parse pRegions ""
 
 pRegions :: Parser [Region]
-pRegions = sepEndBy pIntersect newline
+pRegions = many pRegion
 
 parseRegion :: String -> Either ParseError Region
-parseRegion = parse pIntersect ""
+parseRegion = parse pRegion ""
+
+pRegion :: Parser Region
+pRegion = spaces *> pIntersect
 
 pIntersect :: Parser Region
 pIntersect = chainl1 pTranslate op

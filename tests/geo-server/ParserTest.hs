@@ -29,6 +29,10 @@ spec_primitiveRegions =
       parseRegion "()" `shouldSatisfy` isLeft
     it "fails when the side is missing" $
       parseRegion "[]" `shouldSatisfy` isLeft
+    it "ignores leading spaces" $
+      parseRegion "    [3]" `shouldBe` Right (Square 3)
+    it "ignores leading leading spaces" $
+      parseRegions "[3]  \n  (4)   " `shouldBe` Right [Square 3, Circle 4]
 
 spec_outside :: Spec
 spec_outside =

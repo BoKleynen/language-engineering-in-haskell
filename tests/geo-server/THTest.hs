@@ -87,6 +87,14 @@ spec_intersection =
         it "intersection with itself" $
             (0, 0) `inRegion` r2 `shouldBe` True
 
+        let r3 = $$(toShallow (circle 1 /\ square 2))
+        it "intersection with itself" $
+            (0, 0) `inRegion` r3 `shouldBe` True
+
+        let r4 = $$(toShallow (square 2 /\ circle 1))
+        it "intersection with itself" $
+            (0, 0) `inRegion` r4 `shouldBe` True
+
 spec_translate :: Spec
 spec_translate =
   describe "translate" do

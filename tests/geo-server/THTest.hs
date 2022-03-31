@@ -3,9 +3,7 @@
 
 module THTest where
 
-import Control.Applicative (Applicative(liftA2))
 import Test.Hspec
-import Test.Tasty (TestTree, testGroup)
 
 import GeoServerDeep hiding (inRegion)
 import TH (toShallow)
@@ -40,7 +38,7 @@ spec_circle =
         (1.5, 0.75) `inRegion` c `shouldBe` False
 
     context "when the radius is negative" do
-      let c = circle (-1)
+      let c = $$(toShallow  (circle (-1)))
 
       it "returns True if the point lies within the circle" $
         (0.5, 0.75) `inRegion` c `shouldBe` True
@@ -98,14 +96,20 @@ spec_intersection =
 spec_translate :: Spec
 spec_translate =
   describe "translate" do
-    let r = $$(toShallow (translate (2,2) (circle 1)))
-
     context "when the translated region is a circle" do
+      let r = $$(toShallow (translate (2,2) (circle 1)))
       it "returns True when the point lies in the translated circle" $
         (2,2) `inRegion` r `shouldBe` True
 
       it "returns False when the point lies outside of the translated circle" $
         (0,0) `inRegion` r `shouldBe` False
+
+    context "when the translated region is an intersection" do
+      let r = $$(toShallow (translate (2,2) ((circle 2 /\ circle 2) /\ circle 3)))
+
+      it "returns True when the point lies in the translated intersection" $
+        (2,2) `inRegion` r `shouldBe` True
+
 
 inRegion :: Point -> (Point -> Bool) -> Bool
 p `inRegion` r = r p

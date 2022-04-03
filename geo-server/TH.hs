@@ -20,8 +20,8 @@ toShallow region = [|| \(x,y) -> $$(go region [|| x ||] [|| y ||]) ||]
         in $$(go a  [|| x' ||] [|| y' ||])
       ||]
     go (Outside a) x y = case a of
-                            (Outside a') -> go a' x y
-                            _            -> [|| not $$(go a x y) ||]
+                          (Outside a') -> go a' x y
+                          _            -> [|| not $$(go a x y) ||]
     go (Intersection a1 a2) x y  = intersection a1 a2
       where
         intersection :: Region -> Region -> TExpQ Bool

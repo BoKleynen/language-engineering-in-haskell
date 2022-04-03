@@ -2,9 +2,7 @@
 
 module Output where
 
-import Control.Monad (liftM2)
 import Control.Monad.Writer
-import Data.Monoid
 
 
 type Output = String

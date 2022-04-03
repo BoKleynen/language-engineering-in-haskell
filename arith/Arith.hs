@@ -27,7 +27,7 @@ execute (IPush i) s       = i : s
 execute IAdd      (x:y:s) = y + x : s
 execute ISub      (x:y:s) = y - x : s
 execute IMul      (x:y:s) = y * x : s
-execute i         s       = runtimeError
+execute _         _       = runtimeError
 
 run :: Prog -> Stack -> Stack
 run xs s = foldl (flip execute) s xs

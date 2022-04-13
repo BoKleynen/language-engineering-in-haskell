@@ -8,20 +8,45 @@
 
 module Migration where
 
-import Control.Monad.State (State, MonadState (state))
+import Control.Monad.State (State, MonadState (state), execState)
 
 
-example :: MigrationM ()
-example = createTable "movies" do
-  integer "id" PK NotNull
-  string "title" NotNull
-  string "director" NotNull
-  unique ["director", "title"]
+example :: MigrationM TableDefinition
+example = do
+  dropTable "users"
 
-newtype MigrationM a = MigrationM { unMigrationM :: IO a }
+  createTable "movies" do
+    integer "id" PK NotNull
+    string "title" NotNull
+    string "director" NotNull
+    unique ["director", "title"]
+
+
+newtype MigrationM a = MigrationM { unMigrationM :: State [TableDefinition] a }
   deriving (Functor, Applicative, Monad)
 
-newtype TableM a = TableM { unTableM :: State TableDefinition a }
+createTable :: String -> CreateTableM a -> MigrationM TableDefinition
+createTable name table = MigrationM $ state addTable
+  where
+    addTable tds =
+      let td = execState (execCreateTableM table) (tableWithName name)
+      in (td, td : tds)
+
+dropTable :: String -> MigrationM ()
+dropTable = error ""
+
+alterTable :: String -> String -> MigrationM ()
+alterTable = error ""
+
+newtype AlterTableM a = AlterTableM { execAlterTableM :: State AlterTable a }
+
+data AlterTable = AlterTable
+  { tableDefinition :: TableDefinition
+  , columnAdds :: [ColumnDefinition]
+  , columnDrops :: [String]
+  }
+
+newtype CreateTableM a = CreateTableM { execCreateTableM :: State TableDefinition a }
   deriving (Functor, Applicative, Monad)
 
 data TableDefinition = TableDefinition
@@ -30,8 +55,8 @@ data TableDefinition = TableDefinition
   , tableconstraints :: [TableConstraint]
   }
 
-createTable :: String -> TableM a -> MigrationM ()
-createTable _name _table = error  "TODO"
+tableWithName :: String -> TableDefinition
+tableWithName name = TableDefinition name [] []
 
 data ColumnDefinition = ColumnDefinition
   { columnName :: String
@@ -59,9 +84,9 @@ createColumn typ name = createColumn_ typ name []
 class CreateColumnType r where
   createColumn_ :: ColumnType -> String -> [Constraint] -> r
 
-instance a ~ ColumnDefinition => CreateColumnType (TableM a) where
-  createColumn_ :: ColumnType -> String -> [Constraint]  -> TableM ColumnDefinition
-  createColumn_ typ name constraints = TableM $ state addColumn
+instance a ~ ColumnDefinition => CreateColumnType (CreateTableM a) where
+  createColumn_ :: ColumnType -> String -> [Constraint]  -> CreateTableM ColumnDefinition
+  createColumn_ typ name constraints = CreateTableM $ state addColumn
     where
         addColumn t@TableDefinition{..} =
           let col = ColumnDefinition name typ constraints
@@ -69,7 +94,7 @@ instance a ~ ColumnDefinition => CreateColumnType (TableM a) where
 
 instance CreateColumnType r => CreateColumnType (Constraint -> r) where
   createColumn_ :: ColumnType -> String -> [Constraint] ->  Constraint -> r
-  createColumn_ typ name constraints constraint = createColumn_ typ name (constraint : constraints)
+  createColumn_ typ name cs c = createColumn_ typ name (c : cs)
 
 string :: CreateColumnType r => String -> r
 string = createColumn String
@@ -93,13 +118,13 @@ data TableConstraintKind
   = UniqueTC [String]
   | CheckTC String
 
-unique :: [String] -> TableM TableConstraint
+unique :: [String] -> CreateTableM TableConstraint
 unique columns = constraint $ TableConstraint (UniqueTC columns) Nothing
 
-check :: String -> TableM TableConstraint
+check :: String -> CreateTableM TableConstraint
 check expr = constraint $ TableConstraint (CheckTC expr) Nothing
 
-constraint :: TableConstraint -> TableM TableConstraint
-constraint tc = TableM $ state addConstraint
+constraint :: TableConstraint -> CreateTableM TableConstraint
+constraint tc = CreateTableM $ state addConstraint
   where
     addConstraint t@TableDefinition{..} = (tc, t { tableconstraints = tc : tableconstraints })

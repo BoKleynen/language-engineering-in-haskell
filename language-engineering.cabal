@@ -91,7 +91,6 @@ library monads
 library project
   other-modules:
       Migration
-      Column
   hs-source-dirs:
       project
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wno-orphans -Wno-unused-do-bind

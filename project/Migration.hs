@@ -19,7 +19,12 @@ example = do
     integer "id" PK NotNull
     string "title" NotNull
     string "director" NotNull
+
     unique ["director", "title"]
+
+  alterTable "movies" do
+    integer "duration"
+
 
 
 newtype MigrationM a = MigrationM { unMigrationM :: State [TableDefinition] a }
@@ -32,11 +37,11 @@ createTable name table = MigrationM $ state addTable
       let td = execState (execCreateTableM table) (tableWithName name)
       in (td, td : tds)
 
+alterTable :: String -> AlterTableM a -> MigrationM TableDefinition
+alterTable = error ""
+
 dropTable :: String -> MigrationM ()
 dropTable = error ""
-
-alterTable :: String -> String -> MigrationM ()
-alterTable = error ""
 
 newtype AlterTableM a = AlterTableM { execAlterTableM :: State AlterTable a }
 
@@ -91,6 +96,14 @@ instance a ~ ColumnDefinition => CreateColumnType (CreateTableM a) where
         addColumn t@TableDefinition{..} =
           let col = ColumnDefinition name typ constraints
           in (col, t { columns = col : columns })
+
+instance a ~ ColumnDefinition => CreateColumnType (AlterTableM a) where
+  createColumn_ :: ColumnType -> String -> [Constraint] -> AlterTableM ColumnDefinition
+  createColumn_ typ name constraints = AlterTableM $ state addColumn
+    where
+      addColumn at@AlterTable{ tableDefinition = td@TableDefinition {..}} =
+          let col = ColumnDefinition name typ constraints
+          in (col, at { tableDefinition = td { columns = col : columns } })
 
 instance CreateColumnType r => CreateColumnType (Constraint -> r) where
   createColumn_ :: ColumnType -> String -> [Constraint] ->  Constraint -> r

@@ -8,7 +8,7 @@
 
 module Migration where
 
-import Control.Monad.State (State, modify)
+import Control.Monad.State (State, MonadState (state))
 
 
 example :: MigrationM ()
@@ -16,6 +16,7 @@ example = createTable "movies" do
   integer "id" PK NotNull
   string "title" NotNull
   string "director" NotNull
+  unique ["director", "title"]
 
 newtype MigrationM a = MigrationM { unMigrationM :: IO a }
   deriving (Functor, Applicative, Monad)
@@ -29,7 +30,7 @@ data TableDefinition = TableDefinition
   , tableconstraints :: [TableConstraint]
   }
 
-createTable :: String -> TableM () -> MigrationM ()
+createTable :: String -> TableM a -> MigrationM ()
 createTable _name _table = error  "TODO"
 
 data ColumnDefinition = ColumnDefinition
@@ -58,11 +59,13 @@ createColumn typ name = createColumn_ typ name []
 class CreateColumnType r where
   createColumn_ :: ColumnType -> String -> [Constraint] -> r
 
-instance a ~ () => CreateColumnType (TableM a) where
-  createColumn_ :: ColumnType -> String -> [Constraint]  -> TableM ()
-  createColumn_ typ name constraints = TableM $ modify addColumn
+instance a ~ ColumnDefinition => CreateColumnType (TableM a) where
+  createColumn_ :: ColumnType -> String -> [Constraint]  -> TableM ColumnDefinition
+  createColumn_ typ name constraints = TableM $ state addColumn
     where
-        addColumn t@TableDefinition{..} = t { columns = ColumnDefinition name typ constraints : columns }
+        addColumn t@TableDefinition{..} =
+          let col = ColumnDefinition name typ constraints
+          in (col, t { columns = col : columns })
 
 instance CreateColumnType r => CreateColumnType (Constraint -> r) where
   createColumn_ :: ColumnType -> String -> [Constraint] ->  Constraint -> r
@@ -89,3 +92,14 @@ data TableConstraint = TableConstraint TableConstraintKind (Maybe String)
 data TableConstraintKind
   = UniqueTC [String]
   | CheckTC String
+
+unique :: [String] -> TableM TableConstraint
+unique columns = constraint $ TableConstraint (UniqueTC columns) Nothing
+
+check :: String -> TableM TableConstraint
+check expr = constraint $ TableConstraint (CheckTC expr) Nothing
+
+constraint :: TableConstraint -> TableM TableConstraint
+constraint tc = TableM $ state addConstraint
+  where
+    addConstraint t@TableDefinition{..} = (tc, t { tableconstraints = tc : tableconstraints })

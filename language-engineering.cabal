@@ -1,6 +1,6 @@
 cabal-version: 2.0
 
--- This file has been generated from package.yaml by hpack version 0.34.6.
+-- This file has been generated from package.yaml by hpack version 0.34.7.
 --
 -- see: https://github.com/sol/hpack
 
@@ -15,7 +15,7 @@ author:         Bo Kleynen
 maintainer:     Bo Kleynen
 build-type:     Simple
 tested-with:
-    GHC == 8.10.7, GHC == 9.0.2
+    GHC == 8.10.7
 
 source-repository head
   type: git
@@ -88,6 +88,19 @@ library monads
     , mtl ==2.2.*
   default-language: Haskell2010
 
+library project
+  other-modules:
+      Migration
+      Column
+  hs-source-dirs:
+      project
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wno-orphans -Wno-unused-do-bind
+  build-depends:
+      base >=4.14 && <4.16
+    , mtl ==2.2.*
+    , time ==1.12.*
+  default-language: Haskell2010
+
 library th
   exposed-modules:
       Th
@@ -128,6 +141,7 @@ test-suite geo-server-test
       GeoServerShallowTest
       GeoServerDeepTest
       ParserTest
+      THTest
   hs-source-dirs:
       tests/geo-server
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wno-orphans -Wno-unused-do-bind
@@ -141,6 +155,24 @@ test-suite geo-server-test
     , tasty-hedgehog >=0.1 && <1.1
     , tasty-hspec ==1.2.*
     , tasty-quickcheck ==0.10.*
+  default-language: Haskell2010
+
+test-suite project-test
+  type: exitcode-stdio-1.0
+  main-is: Test.hs
+  other-modules:
+      Paths_language_engineering
+  autogen-modules:
+      Paths_language_engineering
+  hs-source-dirs:
+      tests/project
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wno-orphans -Wno-unused-do-bind
+  build-depends:
+      base >=4.14 && <4.16
+    , hspec ==2.9.*
+    , project
+    , tasty ==1.4.*
+    , tasty-hspec ==1.2.*
   default-language: Haskell2010
 
 test-suite quick

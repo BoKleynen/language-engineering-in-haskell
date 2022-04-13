@@ -6,7 +6,7 @@ description: |
   This package contains some code snippets I wrote for the language engineering topic of
   the course Capita Selecta Computer Science: Artificial Intelligence [H05N0A] at KU Leuven
   (https://onderwijsaanbod.kuleuven.be/2021/syllabi/e/H05N0AE.htm#activetab=doelstellingen_idp1606608).
-tested-with: GHC == 8.10.7, GHC == 9.0.2
+tested-with: GHC == 8.10.7
 dependencies: base >=4.14 && <4.16
 ghc-options:
   - -Wall
@@ -58,6 +58,15 @@ internal-libraries:
       - Lib
     dependencies:
       - template-haskell >= 2.13 && < 2.17
+  project:
+    source-dirs: project
+    exposed-modules: []
+    other-modules:
+      - Migration
+      - Column
+    dependencies:
+      - mtl >= 2.2 && < 2.3
+      - time >=1.12 && <1.13
 tests:
   geo-server-test:
     source-dirs: tests/geo-server
@@ -93,3 +102,11 @@ tests:
       - QuickCheck >= 2.14 && < 2.15
       - tasty >= 0.11 && < 1.5
       - tasty-quickcheck >= 0.10 && < 0.11
+  project-test:
+    source-dirs: tests/project
+    main: Test.hs
+    dependencies:
+      - project
+      - tasty >= 1.4 && < 1.5
+      - tasty-hspec >= 1.2 && < 1.3
+      - hspec >= 2.9 && < 2.10

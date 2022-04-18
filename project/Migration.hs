@@ -10,6 +10,9 @@ module Migration where
 
 import Control.Monad.State (State, MonadState (state), execState)
 
+class Migrator a where
+  migrate :: a -> String -> MigrationM () -> IO ()
+
 
 example :: MigrationM TableDefinition
 example = do
@@ -26,6 +29,12 @@ example = do
     integer "duration"
 
 
+class Monad m => MonadMigration m where
+  createTable' :: String -> CreateTableM a -> m TableDefinition
+
+  alterTable' :: String -> AlterTableM a -> m AlterTable
+
+  dropTable' :: String -> m ()
 
 newtype MigrationM a = MigrationM { unMigrationM :: State [TableDefinition] a }
   deriving (Functor, Applicative, Monad)
@@ -34,7 +43,7 @@ createTable :: String -> CreateTableM a -> MigrationM TableDefinition
 createTable name table = MigrationM $ state addTable
   where
     addTable tds =
-      let td = execState (execCreateTableM table) (tableWithName name)
+      let td = execState (execCreateTableM table) (TableDefinition [] [])
       in (td, td : tds)
 
 alterTable :: String -> AlterTableM a -> MigrationM TableDefinition
@@ -46,22 +55,19 @@ dropTable = error ""
 newtype AlterTableM a = AlterTableM { execAlterTableM :: State AlterTable a }
 
 data AlterTable = AlterTable
-  { tableDefinition :: TableDefinition
-  , columnAdds :: [ColumnDefinition]
+  { columnAdds :: [ColumnDefinition]
   , columnDrops :: [String]
+  , tcAdds :: [TableConstraint]
+  , tcDrops :: [String]
   }
 
 newtype CreateTableM a = CreateTableM { execCreateTableM :: State TableDefinition a }
   deriving (Functor, Applicative, Monad)
 
 data TableDefinition = TableDefinition
-  { tableName :: String
-  , columns :: [ColumnDefinition]
+  { columns :: [ColumnDefinition]
   , tableconstraints :: [TableConstraint]
   }
-
-tableWithName :: String -> TableDefinition
-tableWithName name = TableDefinition name [] []
 
 data ColumnDefinition = ColumnDefinition
   { columnName :: String
@@ -82,6 +88,7 @@ data Constraint
   | Unique
   | Check String
   | Default String
+  | References String
 
 createColumn :: CreateColumnType r => ColumnType -> String -> r
 createColumn typ name = createColumn_ typ name []
@@ -101,9 +108,9 @@ instance a ~ ColumnDefinition => CreateColumnType (AlterTableM a) where
   createColumn_ :: ColumnType -> String -> [Constraint] -> AlterTableM ColumnDefinition
   createColumn_ typ name constraints = AlterTableM $ state addColumn
     where
-      addColumn at@AlterTable{ tableDefinition = td@TableDefinition {..}} =
+      addColumn at@AlterTable{..} =
           let col = ColumnDefinition name typ constraints
-          in (col, at { tableDefinition = td { columns = col : columns } })
+          in (col, at { columnAdds = col : columnAdds })
 
 instance CreateColumnType r => CreateColumnType (Constraint -> r) where
   createColumn_ :: ColumnType -> String -> [Constraint] ->  Constraint -> r

@@ -5,20 +5,25 @@
 
 module Postgres where
 
-import Database.PostgreSQL.Simple ( execute, Connection )
+import Database.PostgreSQL.Simple ( execute, Connection, connectPostgreSQL, close )
 
 import Migration
 import Control.Monad.State
 import Data.String
 import Data.List ( intercalate )
-import Control.Monad.Reader (ReaderT, MonadReader (ask))
+import Control.Monad.Reader (ReaderT (runReaderT), MonadReader (ask))
+import Control.Exception (bracket)
 
+
+postgresMigration :: String -> PostgresMigrator a -> IO a
+postgresMigration connString (PostgresMigrator migration)
+  = bracket (connectPostgreSQL (fromString connString)) close (runReaderT migration)
 
 newtype PostgresMigrator a = PostgresMigrator (ReaderT Connection IO a)
   deriving (Functor, Applicative, Monad)
 
 instance MonadMigration PostgresMigrator where
-  createTable' name CreateTableM {..} = PostgresMigrator do
+  createTable name CreateTableM {..} = PostgresMigrator do
       conn <- ask
       let td = execState execCreateTableM (TableDefinition [] [])
       lift (execute conn (query td) ())
@@ -29,7 +34,7 @@ instance MonadMigration PostgresMigrator where
         <> intercalate ", " (map tableConstraintToQuery tableconstraints)
         <> ");"
 
-  alterTable' name AlterTableM {..} = PostgresMigrator do
+  alterTable name AlterTableM {..} = PostgresMigrator do
       conn <- ask
       let at = execState execAlterTableM (AlterTable [] [] [] [])
       liftIO (execute conn (query at) ())
@@ -47,7 +52,7 @@ instance MonadMigration PostgresMigrator where
       tcAddtToQuery tc = "ADD " ++ tableConstraintToQuery tc
       tcDropToQuery con = "DROP CONSTRAINT " ++ con
 
-  dropTable' name = PostgresMigrator do
+  dropTable name = PostgresMigrator do
       conn <- ask
       liftIO (execute conn query ())
       return ()

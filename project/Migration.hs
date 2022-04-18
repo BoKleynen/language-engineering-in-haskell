@@ -8,49 +8,18 @@
 
 module Migration where
 
-import Control.Monad.State (State, MonadState (state), execState)
-
-class Migrator a where
-  migrate :: a -> String -> MigrationM () -> IO ()
-
-
-example :: MigrationM TableDefinition
-example = do
-  dropTable "users"
-
-  createTable "movies" do
-    integer "id" PK NotNull
-    string "title" NotNull
-    string "director" NotNull
-
-    unique ["director", "title"]
-
-  alterTable "movies" do
-    integer "duration"
+import Control.Monad.State (State, MonadState (state))
 
 
 class Monad m => MonadMigration m where
-  createTable' :: String -> CreateTableM a -> m TableDefinition
+  createTable :: String -> CreateTableM a -> m TableDefinition
 
-  alterTable' :: String -> AlterTableM a -> m AlterTable
+  alterTable :: String -> AlterTableM a -> m AlterTable
 
-  dropTable' :: String -> m ()
+  dropTable :: String -> m ()
 
 newtype MigrationM a = MigrationM { unMigrationM :: State [TableDefinition] a }
   deriving (Functor, Applicative, Monad)
-
-createTable :: String -> CreateTableM a -> MigrationM TableDefinition
-createTable name table = MigrationM $ state addTable
-  where
-    addTable tds =
-      let td = execState (execCreateTableM table) (TableDefinition [] [])
-      in (td, td : tds)
-
-alterTable :: String -> AlterTableM a -> MigrationM TableDefinition
-alterTable = error ""
-
-dropTable :: String -> MigrationM ()
-dropTable = error ""
 
 newtype AlterTableM a = AlterTableM { execAlterTableM :: State AlterTable a }
 

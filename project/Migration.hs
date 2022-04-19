@@ -14,9 +14,9 @@ import Control.Monad.State (State, MonadState (state))
 class Monad m => MonadMigration m where
   createTable :: String -> CreateTableM a -> m TableDefinition
 
-  alterTable :: String -> AlterTableM a -> m AlterTable
-
   dropTable :: String -> m ()
+
+  alterTable :: String -> AlterTableM a -> m AlterTable
 
 newtype MigrationM a = MigrationM { unMigrationM :: State [TableDefinition] a }
   deriving (Functor, Applicative, Monad)

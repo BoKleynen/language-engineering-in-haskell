@@ -5,7 +5,7 @@
 
 module Postgres where
 
-import Database.PostgreSQL.Simple ( execute, Connection, connectPostgreSQL, close )
+import Database.PostgreSQL.Simple
 
 import Migration
 import Control.Monad.State
@@ -26,10 +26,10 @@ instance MonadMigration PostgresMigrator where
   createTable name CreateTableM {..} = PostgresMigrator do
       conn <- ask
       let td = execState execCreateTableM (TableDefinition [] [])
-      lift (execute conn (query td) ())
+      liftIO $ execute_ conn (q td)
       return td
     where
-      query TableDefinition {..} = fromString $ "CREATE TABLE " <> name <> " ("
+      q TableDefinition {..} = fromString $ "CREATE TABLE " <> name <> " ("
         <> intercalate ", " (map columnDefinitionToQuery columns)
         <> intercalate ", " (map tableConstraintToQuery tableconstraints)
         <> ");"
@@ -37,27 +37,27 @@ instance MonadMigration PostgresMigrator where
   alterTable name AlterTableM {..} = PostgresMigrator do
       conn <- ask
       let at = execState execAlterTableM (AlterTable [] [] [] [])
-      liftIO (execute conn (query at) ())
+      liftIO $ execute_ conn (q at)
       return at
     where
-      query AlterTable {..} = fromString $ "ALTER TABLE " <> name <> " ("
+      q AlterTable {..} = fromString $ "ALTER TABLE " <> name <> " ("
         <> intercalate ", " (
           map columnAddToQuery columnAdds
           ++ map columnDropToQuery columnDrops
-          ++ map tcAddtToQuery tcAdds
+          ++ map tcAddToQuery tcAdds
           ++ map tcDropToQuery tcDrops)
         <> ");"
       columnAddToQuery cd = "ADD COLUMN " ++ columnDefinitionToQuery cd
       columnDropToQuery col = "DROP COLUMN " ++ col
-      tcAddtToQuery tc = "ADD " ++ tableConstraintToQuery tc
+      tcAddToQuery tc = "ADD " ++ tableConstraintToQuery tc
       tcDropToQuery con = "DROP CONSTRAINT " ++ con
 
   dropTable name = PostgresMigrator do
       conn <- ask
-      liftIO (execute conn query ())
+      liftIO $ execute_ conn q
       return ()
     where
-      query = fromString $ "DROP TABLE " ++ name
+      q = fromString $ "DROP TABLE " ++ name
 
 
 columnDefinitionToQuery :: ColumnDefinition -> String
@@ -69,7 +69,6 @@ columnTypeToQuery Int = "INTEGER"
 columnTypeToQuery BigInt = "BIGINT"
 columnTypeToQuery Bool = "BOOL"
 columnTypeToQuery (Raw str) = str
-
 
 columnConstraintToQuery :: Constraint -> String
 columnConstraintToQuery PK = "PRIMARY KEY"

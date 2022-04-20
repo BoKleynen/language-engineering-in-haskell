@@ -10,7 +10,6 @@
 module SQLite where
 
 import Database.SQLite.Simple
-import Database.SQLite.Simple.FromRow
 import Control.Monad.Reader (ReaderT (runReaderT), MonadReader (ask))
 import Control.Exception (bracket)
 import Data.String (IsString(fromString))

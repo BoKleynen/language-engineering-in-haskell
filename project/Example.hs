@@ -1,25 +1,11 @@
+{-# LANGUAGE BlockArguments #-}
+
 module Example where
 
--- migration do
---   table "movies" do
---     integer "id"
---     string "name"
---     integer "duration" do
---       index
---       unique
---       primaryKey
---       nullable
---     index name
---     unique $ index ["id", "name"]
---
---   dropTable "movies"
---
---   alterTable "movies" do
---     renameTo "videos"
---     renameTable "name" "title"
---     changeColumnNull "name" False
---
---   createTable "reviews" do
---     integer "id" primaryKey
---     integer "movie_id" do
---       references "movies" "id"
+import Postgres (postgresMigration)
+import Migration
+import SQLite (sqliteMigration)
+
+main :: IO ()
+main = sqliteMigration "db.sqlite3" do
+    dropTable "movies"

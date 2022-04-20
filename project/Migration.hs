@@ -18,9 +18,6 @@ class Monad m => MonadMigration m where
 
   alterTable :: String -> AlterTableM a -> m AlterTable
 
-newtype MigrationM a = MigrationM { unMigrationM :: State [TableDefinition] a }
-  deriving (Functor, Applicative, Monad)
-
 newtype AlterTableM a = AlterTableM { execAlterTableM :: State AlterTable a }
 
 data AlterTable = AlterTable

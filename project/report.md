@@ -31,7 +31,8 @@ createTable "movies" do
 
 Once a table has been created, it can be changed using `alterTable`:
 ```haskell
-
+alterTable "movies" do
+    string "description"
 ```
 
 When a table is no longer needed it can be dropped using:
@@ -46,9 +47,15 @@ main = sqliteMigration "db.sqlite3" do
     dropTable "movies"
 ```
 
-# How it works
+# How it (should) works
 
+There are 2 important parts of the DSL: constructing a description of a migration and running said migration.
 
+The first part is achieved independent of the specific database engine in the `Migration` module by the `CreateTableM` and `AlterTableM` monads and
+some functions to construct and compose these. The goal with these monads was to provide a syntax that closely mimics SQL, to ease the learning curve.
+
+Running the migrations is achieved by the `MonadMigration` type class, which provides the `createTable`, `alterTable` and `dropTable` functions that
+must then be implemented for each database engine.
 
 # Problems
 
@@ -59,8 +66,9 @@ which due to the cases insensitive nature of SQL was needed to extract certain i
 to figure out how the regex libraries in haskell work is their highly polymorphic nature, whilst probably great for advanced users, it does make it
 harder to figure out what arguments have to be provided and what can be expected as output.
 
-- Most sqlite libraries I encountered aren't actively maintained.
-
-- Certain information about the schema in sqlite is quite hard to retrieve, which makes it quite tricky to emulate certain features that postgres has
-out of the box. The reason for this is the fact that sqlite stores the schema information as plain text in a special table called sqlite_master, this
-this is probably the same reason that the alter table support is so poor in sqlite.
+- Getting the necessary schema information out of an sqlite database proved to be quite hard. There's the `table_info` pragma that returns some basic
+information about a table's columns, but it is lacking uniqueness constraints or foreign keys. Another pragma that seemed useful at first sight is
+`index_list`, but this pragma doesn't provide any info about the columns involved in the index. The same problem arises when querying the
+sqlite_master table for indexes, the sql column was always `null`. Unless there's some hidden feature of sqlite that i'm unaware of after spending
+countless hours going through the reference the only remaining option is writing a parser for the entire `CREATE TABLE` command which I didn't have
+time for anymore.

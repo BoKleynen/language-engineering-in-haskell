@@ -97,10 +97,8 @@ library project
       project
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wno-orphans -Wno-unused-do-bind
   build-depends:
-      array ==0.5.*
-    , base >=4.14 && <4.16
+      base >=4.14 && <4.16
     , mtl ==2.2.*
-    , parsec ==3.1.*
     , postgresql-simple >=0.5 && <0.7
     , regex-base ==0.94.*
     , regex-pcre ==0.95.*

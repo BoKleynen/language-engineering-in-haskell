@@ -80,14 +80,15 @@ instance MonadMigration SQLiteMigrator where
         <> ");"
 
       alterTableWithCopy :: Connection -> AlterTable -> IO ()
-      alterTableWithCopy conn AlterTable {..} = do
-        constraints <- checkConstraints conn table
-        let constraints' = filter (\ConstraintDef { tableName } -> tableName `elem` tcDrops) constraints
+      alterTableWithCopy conn AlterTable {..} = error "unimplemented"
+        -- do
+        -- constraints <- checkConstraints conn table
+        -- let constraints' = filter (\ConstraintDef { tableName } -> tableName `elem` tcDrops) constraints
         -- let newConstraints = map tableConstraintToConstraintDef tcAdds AlterTable
-        return ()
+        -- return ()
 
-      tableConstraintToConstraintDef :: TableConstraint -> ConstraintDef
-      tableConstraintToConstraintDef _ = error ""
+      -- tableConstraintToConstraintDef :: TableConstraint -> ConstraintDef
+      -- tableConstraintToConstraintDef _ = error ""
 
       columnAddToQuery cd = "ADD COLUMN " ++ columnDefinitionToQuery cd
       columnDropToQuery col = "DROP COLUMN " ++ col
@@ -138,14 +139,14 @@ data ConstraintDef = ConstraintDef
   , name :: String
   }
 
-tableStructure :: Connection -> String -> IO [ColumnDefinition]
-tableStructure conn table = do
-    cols <- query_ conn $ fromString $ "PRAGMA table_info('" <> table <> "');" :: IO [TableInfo]
-    moveTable conn table "" (map tableInfoToColumnDef cols)
-    return []
-  where
-    tableInfoToColumnDef :: TableInfo -> ColumnDefinition
-    tableInfoToColumnDef (TableInfo _ name typ notNull dfltVal pk) = ColumnDefinition name Int []
+-- tableStructure :: Connection -> String -> IO [ColumnDefinition]
+-- tableStructure conn table = do
+--     cols <- query_ conn $ fromString $ "PRAGMA table_info('" <> table <> "');" :: IO [TableInfo]
+--     moveTable conn table "" (map tableInfoToColumnDef cols)
+--     return []
+--   where
+--     tableInfoToColumnDef :: TableInfo -> ColumnDefinition
+--     tableInfoToColumnDef (TableInfo _ name typ notNull dfltVal pk) = ColumnDefinition name Int []
 
 
 data TableInfo = TableInfo Int String String Bool String Bool
@@ -153,16 +154,16 @@ data TableInfo = TableInfo Int String String Bool String Bool
 
 deriving instance FromRow TableInfo
 
-moveTable :: Connection -> String -> String -> [ColumnDefinition] -> IO ()
-moveTable conn table alteredTable cols = do
-    createTable_ conn alteredTable TableDefinition {columns=cols, tableconstraints=[]}
-    copyData
-    execute_ conn $ fromString $ "DROP TABLE " <> table
-  where
-    copyData :: IO ()
-    copyData =
-      let columnNames = intercalate ", " $ map (\ColumnDefinition {columnName} -> columnName) cols
-      in execute_ conn $ fromString $ "INSERT INTO " <> alteredTable
-      <> " (" <> columnNames <> ") "
-      <> "SELECT " <> columnNames
-      <> " FROM " <> table
+-- moveTable :: Connection -> String -> String -> [ColumnDefinition] -> IO ()
+-- moveTable conn table alteredTable cols = do
+--     createTable_ conn alteredTable TableDefinition {columns=cols, tableconstraints=[]}
+--     copyData
+--     execute_ conn $ fromString $ "DROP TABLE " <> table
+--   where
+--     copyData :: IO ()
+--     copyData =
+--       let columnNames = intercalate ", " $ map (\ColumnDefinition {columnName} -> columnName) cols
+--       in execute_ conn $ fromString $ "INSERT INTO " <> alteredTable
+--       <> " (" <> columnNames <> ") "
+--       <> "SELECT " <> columnNames
+--       <> " FROM " <> table

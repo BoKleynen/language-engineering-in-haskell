@@ -61,12 +61,12 @@ must then be implemented for each database engine.
 
 These are some of the problems I personally encountered whilst working on this project in no particular order.
 
-- Most of the available documentation and blog posts only mention the `=~` and `=~~` operators which doesn't allow for case insensitive matching, which
+Most of the available documentation and blog posts only mention the `=~` and `=~~` operators which doesn't allow for case insensitive matching, which
 which due to the cases insensitive nature of SQL was needed to extract certain info from sqlite_master table. Another issue I encountered while trying
 to figure out how the regex libraries in haskell work is their highly polymorphic nature, whilst probably great for advanced users, it does make it
 harder to figure out what arguments have to be provided and what can be expected as output.
 
-- Getting the necessary schema information out of an sqlite database proved to be quite hard. There's the `table_info` pragma that returns some basic
+Getting the necessary schema information out of an sqlite database proved to be quite hard. There's the `table_info` pragma that returns some basic
 information about a table's columns, but it is lacking uniqueness constraints or foreign keys. Another pragma that seemed useful at first sight is
 `index_list`, but this pragma doesn't provide any info about the columns involved in the index. The same problem arises when querying the
 sqlite_master table for indexes, the sql column was always `null`. Unless there's some hidden feature of sqlite that i'm unaware of after spending
